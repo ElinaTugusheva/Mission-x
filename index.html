@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Миссия ×</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Segoe UI,sans-serif;min-height:100dvh;color:#fff;background:radial-gradient(1200px 600px at 50% -10%,#3b1d7a,#12082c 45%,#070414);
+  overflow-x:hidden;user-select:none}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:
+  radial-gradient(1.5px 1.5px at 8% 12%,#fff,transparent),radial-gradient(1.5px 1.5px at 22% 38%,#fff8,transparent),
+  radial-gradient(2px 2px at 48% 18%,#fff,transparent),radial-gradient(1px 1px at 72% 28%,#fff8,transparent),
+  radial-gradient(1.5px 1.5px at 88% 14%,#fff,transparent),radial-gradient(1px 1px at 16% 72%,#fff8,transparent),
+  radial-gradient(2px 2px at 62% 78%,#fff,transparent),radial-gradient(1px 1px at 92% 68%,#fff8,transparent),
+  radial-gradient(1.5px 1.5px at 38% 88%,#fff,transparent);animation:twinkle 3.5s ease-in-out infinite}
+@keyframes twinkle{50%{opacity:.55}}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+#app{max-width:480px;margin:0 auto;padding:18px 16px 28px;min-height:100dvh}
+.screen{display:none;flex-direction:column;align-items:center;gap:14px;min-height:calc(100dvh - 46px)}
+.screen.on{display:flex}
+h1{font-size:clamp(1.8rem,7vw,2.5rem);letter-spacing:.02em;text-align:center;animation:pop .5s}
+.sub{opacity:.85;text-align:center;font-size:1.05rem;margin-bottom:6px}
+.card{width:100%;background:#ffffff14;border:1px solid #ffffff22;border-radius:22px;padding:16px;backdrop-filter:blur(6px)}
+.hero-row{display:flex;align-items:center;justify-content:space-around;gap:8px;text-align:center}
+.hero-row b{display:block;font-size:1.1rem}
+.stat{opacity:.85;font-size:.95rem}
+.btn{width:100%;border:0;border-radius:18px;padding:16px 18px;font-size:1.2rem;font-weight:700;cursor:pointer;color:#1a1030}
+.btn.play{background:linear-gradient(180deg,#ffe36a,#ffb347)}
+.btn.alt{background:linear-gradient(180deg,#8ae0ff,#5b9dff);color:#0b1a33}
+.btn.ok{background:linear-gradient(180deg,#7dffb0,#2ee07a)}
+.btn.warn{background:linear-gradient(180deg,#ffd0d0,#ff7b7b);color:#3a1010}
+.btn.ghost{background:#ffffff18;color:#fff;font-weight:600;font-size:1rem}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.heroes{display:grid;gap:12px;width:100%}
+.heroes button{display:flex;align-items:center;gap:14px;font-size:1.25rem;padding:16px;border-radius:20px;border:2px solid #ffffff33;background:#ffffff14;color:#fff;cursor:pointer}
+.heroes button:hover{border-color:#ffe36a;background:#ffffff22}
+.planets{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
+.planet{aspect-ratio:1;border-radius:50%;border:3px solid #ffffff33;background:radial-gradient(circle at 35% 30%,#fff6,#ffffff10);color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:800;font-size:1.05rem;transition:transform .2s}
+.planet:not(:disabled):hover{transform:scale(1.06)}
+.planet:disabled{filter:grayscale(.8) brightness(.7);cursor:default}
+.hud{display:flex;justify-content:space-between;width:100%;font-size:1.05rem;flex-wrap:wrap;gap:6px}
+.q{font-size:clamp(2rem,9vw,2.8rem);font-weight:800;margin:10px 0 4px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.answers button{border:0;border-radius:20px;min-height:72px;font-size:1.7rem;font-weight:800;cursor:pointer;color:#1a1030}
+.answers button:nth-child(1){background:#7dffb0}
+.answers button:nth-child(2){background:#8ae0ff}
+.answers button:nth-child(3){background:#ffe36a}
+.answers button:nth-child(4){background:#ffb0e0}
+.fb{min-height:52px;font-size:1.25rem;font-weight:700;text-align:center}
+.fb.ok{animation:pop .35s;color:#7dffb0}
+.fb.bad{animation:shake .35s;color:#ffd0d0}
+.big{font-size:clamp(1.6rem,6vw,2.1rem);text-align:center}
+.rows{width:100%;display:grid;gap:10px}
+.rows div{display:flex;justify-content:space-between;background:#ffffff14;border-radius:16px;padding:14px 16px;font-size:1.05rem}
+.muted{opacity:.65;font-size:.95rem;text-align:center}
+@media (max-width:380px){.planets{grid-template-columns:1fr 1fr}.answers button{min-height:64px;font-size:1.45rem}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="home" class="screen">
+    <h1>🚀 Миссия ×</h1>
+    <p class="sub">Прокачай умножение и покори космос!</p>
+    <div class="card hero-row" id="homeInfo" onclick="showScreen('hero')"></div>
+    <button class="btn play" onclick="play()">Играть</button>
+    <button class="btn alt" onclick="renderProgress();showScreen('progress')">Прогресс</button>
+  </div>
+  <div id="hero" class="screen">
+    <h1>Выбери героя</h1>
+    <div class="heroes" id="heroList"></div>
+    <button class="btn ghost" onclick="showScreen('home');renderHome()">Назад</button>
+  </div>
+  <div id="map" class="screen">
+    <h1>Карта миссий</h1>
+    <p class="muted" id="mapHero"></p>
+    <div class="planets" id="planets"></div>
+    <button class="btn ghost" onclick="renderHome();showScreen('home')">На главную</button>
+  </div>
+  <div id="play" class="screen">
+    <h1 id="lvlTitle"></h1>
+    <div class="hud">
+      <span id="qNum"></span>
+      <span id="lives"></span>
+      <span id="score"></span>
+      <span id="streak"></span>
+    </div>
+    <p class="q" id="expr"></p>
+    <div class="fb" id="fb"></div>
+    <div class="answers" id="answers"></div>
+  </div>
+  <div id="fail" class="screen">
+    <p class="big">😅 Почти получилось!</p>
+    <button class="btn play" onclick="startLevel(Q.n)">Попробовать снова</button>
+    <button class="btn ghost" onclick="renderMap();showScreen('map')">На карту</button>
+  </div>
+  <div id="win" class="screen">
+    <p class="big" id="winTitle">🎉 Миссия выполнена!</p>
+    <div class="rows" id="winStats"></div>
+    <button class="btn ok" id="nextBtn" onclick="nextMission()">Следующая миссия</button>
+    <button class="btn ghost" onclick="renderMap();showScreen('map')">На карту</button>
+  </div>
+  <div id="progress" class="screen">
+    <h1>🏆 Прогресс</h1>
+    <div class="rows" id="progRows"></div>
+    <button class="btn ghost" onclick="renderHome();showScreen('home')">Назад</button>
+    <button class="btn warn" onclick="resetGame()">Сбросить прогресс</button>
+  </div>
+</div>
+<script>
+const KEY='missionx';
+const LEVELS=[2,3,4,5,6,7,8,9,10];
+const PLANETS={2:'🌍',3:'🌕',4:'🔴',5:'🟠',6:'🟡',7:'🟢',8:'🔵',9:'🟣',10:'🪐'};
+const HEROES={astronaut:['🧑‍🚀','Космонавт'],robot:['🤖','Робот'],unicorn:['🦄','Единорог']};
+let S,Q,audio;
+
+function fresh(){
+  return {hero:null,currentLevel:2,unlockedLevel:2,totalScore:0,stars:{},stats:{correct:0,wrong:0,bestStreak:0,answered:0}};
+}
+function loadGame(){
+  try{
+    const r=JSON.parse(localStorage.getItem(KEY));
+    S=r&&typeof r==='object'?Object.assign(fresh(),r,{stats:Object.assign(fresh().stats,r.stats||{})}):fresh();
+    if(!S.stars)S.stars={};
+  }catch(e){S=fresh()}
+}
+function saveGame(){localStorage.setItem(KEY,JSON.stringify(S))}
+function resetGame(){
+  if(!confirm('Сбросить весь прогресс?'))return;
+  S=fresh();saveGame();renderHome();showScreen('home');
+}
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('on',el.id===id));
+}
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+function totalStars(){return LEVELS.reduce((n,l)=>n+(S.stars[l]||0),0)}
+function sound(kind){
+  try{
+    audio=audio||new(window.AudioContext||window.webkitAudioContext)();
+    if(audio.state==='suspended')audio.resume();
+    const now=audio.currentTime;
+    const beep=(f,t,d)=>{
+      const o=audio.createOscillator(),g=audio.createGain();
+      o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(.08,now+t);
+      g.gain.exponentialRampToValueAtTime(.001,now+t+d);
+      o.connect(g);g.connect(audio.destination);o.start(now+t);o.stop(now+t+d);
+    };
+    if(kind===1)beep(660,0,.14);
+    else if(kind===2){beep(523,0,.12);beep(659,.12,.12);beep(784,.24,.22)}
+    else beep(180,0,.18);
+  }catch(e){}
+}
+function renderHome(){
+  const h=S.hero&&HEROES[S.hero];
+  document.getElementById('homeInfo').innerHTML=
+    `<div><span style="font-size:2rem">${h?h[0]:'❓'}</span><b>${h?h[1]:'Выбери героя'}</b></div>
+     <div class="stat">Уровень<br><b>×${S.currentLevel}</b></div>
+     <div class="stat">Звёзды<br><b>⭐ ${totalStars()}</b></div>`;
+}
+function play(){
+  if(!S.hero){showScreen('hero');return}
+  renderMap();showScreen('map');
+}
+function pickHero(id){
+  S.hero=id;saveGame();renderMap();showScreen('map');
+}
+function renderMap(){
+  const h=HEROES[S.hero];
+  document.getElementById('mapHero').textContent=h?h[0]+' '+h[1]:'';
+  document.getElementById('planets').innerHTML=LEVELS.map(n=>{
+    const open=n<=S.unlockedLevel, st=S.stars[n]||0;
+    return `<button class="planet" ${open?'':'disabled'} onclick="startLevel(${n})">
+      <span style="font-size:1.6rem">${open?PLANETS[n]:'🔒'}</span>×${n}
+      <small>${'⭐'.repeat(st)}</small></button>`;
+  }).join('');
+}
+function startLevel(n){
+  Q={n,i:0,lives:3,score:0,correct:0,streak:0,maxStreak:0,lock:0,qs:shuffle([1,2,3,4,5,6,7,8,9,10]),ans:0};
+  S.currentLevel=n;saveGame();
+  document.getElementById('lvlTitle').textContent=PLANETS[n]+' Таблица ×'+n;
+  showScreen('play');generateQuestion();
+}
+function distractors(ans,a,b){
+  const used=new Set([ans]), d=[];
+  [ (a+1)*b,(a-1)*b,a*(b+1),a*(b-1),ans+1,ans-1,ans+a,Math.abs(ans-a),ans+10,Math.abs(ans-10) ]
+    .forEach(v=>{if(v>0&&!used.has(v)){used.add(v);d.push(v)}});
+  while(d.length<3){
+    const v=ans+(1+Math.floor(Math.random()*12))*(Math.random()<.5?1:-1);
+    if(v>0&&!used.has(v)){used.add(v);d.push(v)}
+  }
+  return d.slice(0,3);
+}
+function generateQuestion(){
+  const a=Q.n,b=Q.qs[Q.i];Q.ans=a*b;Q.lock=0;
+  document.getElementById('qNum').textContent=(Q.i+1)+' / 10';
+  document.getElementById('expr').textContent=a+' × '+b+' = ?';
+  document.getElementById('fb').textContent='';
+  document.getElementById('fb').className='fb';
+  document.getElementById('answers').innerHTML=shuffle([Q.ans,...distractors(Q.ans,a,b)])
+    .map(v=>`<button onclick="checkAnswer(${v})">${v}</button>`).join('');
+  updateHUD();
+}
+function updateHUD(){
+  document.getElementById('lives').textContent='❤️'.repeat(Q.lives)+'🖤'.repeat(3-Q.lives);
+  document.getElementById('score').textContent='⭐ '+Q.score;
+  document.getElementById('streak').textContent='🔥 '+Q.streak;
+}
+function checkAnswer(v){
+  if(Q.lock)return;Q.lock=1;
+  const ok=v===Q.ans, fb=document.getElementById('fb');
+  S.stats.answered++;
+  document.querySelectorAll('#answers button').forEach(b=>b.disabled=true);
+  if(ok){
+    Q.streak++;Q.correct++;Q.score+=10;S.totalScore+=10;S.stats.correct++;
+    if(Q.streak===3){Q.score+=5;S.totalScore+=5}
+    if(Q.streak===5){Q.score+=10;S.totalScore+=10}
+    if(Q.streak===10){Q.score+=20;S.totalScore+=20}
+    if(Q.streak>Q.maxStreak)Q.maxStreak=Q.streak;
+    if(Q.streak>S.stats.bestStreak)S.stats.bestStreak=Q.streak;
+    fb.className='fb ok';fb.textContent='🎉 Верно!';sound(1);
+  }else{
+    Q.lives--;Q.streak=0;S.stats.wrong++;
+    fb.className='fb bad';fb.innerHTML='💡 Попробуй ещё раз!<br>Правильно: '+Q.ans;sound(0);
+  }
+  saveGame();updateHUD();
+  setTimeout(()=>{
+    if(Q.i>=9){finishLevel();return}
+    if(Q.lives<=0){showScreen('fail');return}
+    nextQuestion();
+  },ok?900:1400);
+}
+function nextQuestion(){Q.i++;generateQuestion()}
+function finishLevel(){
+  const pct=Q.correct*10, stars=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  if(stars>(S.stars[Q.n]||0))S.stars[Q.n]=stars;
+  if(stars>=1&&Q.n>=S.unlockedLevel&&Q.n<10)S.unlockedLevel=Q.n+1;
+  if(stars>=1)S.currentLevel=Math.min(Q.n+1,10);
+  saveGame();sound(2);
+  const last=Q.n===10&&stars>=1;
+  document.getElementById('winTitle').textContent=last?'🏆 Ты покорил всю таблицу умножения!':'🎉 Миссия выполнена!';
+  document.getElementById('winStats').innerHTML=
+    `<div><span>Очки</span><b>⭐ ${Q.score}</b></div>
+     <div><span>Правильных</span><b>${Q.correct} / 10</b></div>
+     <div><span>Макс. серия</span><b>🔥 ${Q.maxStreak}</b></div>
+     <div><span>Звёзды</span><b>${'⭐'.repeat(stars)||'—'}</b></div>`;
+  const nb=document.getElementById('nextBtn');
+  nb.style.display=last?'none':'block';
+  showScreen('win');
+}
+function nextMission(){
+  const n=Q.n+1;
+  if(n<=10&&n<=S.unlockedLevel)startLevel(n);
+  else{renderMap();showScreen('map')}
+}
+function renderProgress(){
+  const done=LEVELS.filter(n=>(S.stars[n]||0)>=1).length;
+  document.getElementById('progRows').innerHTML=
+    `<div><span>🏆 Общий счёт</span><b>${S.totalScore}</b></div>
+     <div><span>✅ Правильных ответов</span><b>${S.stats.correct}</b></div>
+     <div><span>❌ Ошибок</span><b>${S.stats.wrong}</b></div>
+     <div><span>🔥 Лучшая серия</span><b>${S.stats.bestStreak}</b></div>
+     <div><span>📚 Пройдено уровней</span><b>${done} / 9</b></div>
+     <div><span>⭐ Общее количество звёзд</span><b>${totalStars()}</b></div>`;
+}
+
+document.getElementById('heroList').innerHTML=Object.entries(HEROES).map(([id,h])=>
+  `<button onclick="pickHero('${id}')"><span style="font-size:2rem">${h[0]}</span>${h[1]}</button>`).join('');
+loadGame();renderHome();showScreen('home');
+</script>
+</body>
+</html>
